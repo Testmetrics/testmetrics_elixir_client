@@ -1,4 +1,4 @@
-# TestmetricsElixirClient
+# TestmetricsElixirClient [![Build Status](https://travis-ci.com/Testmetrics/testmetrics_elixir_client.svg?branch=master)](https://travis-ci.com/Testmetrics/testmetrics_elixir_client)
 
 The official ExUnit client for Testmetrics. This client collects data about your
 ExUnit runs on CI and sends that data to Testmetrics so you can gain valuable

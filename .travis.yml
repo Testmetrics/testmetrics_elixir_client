@@ -1,7 +1,7 @@
 language: elixir
 elixir:
-  - 1.6.6
-  - 1.7.1
+  - 1.7
+  - 1.6
 otp_release:
   - 20.3
   - 21.0
@@ -14,6 +14,8 @@ script:
   - mix dialyzer --halt-exit-status
 sudo: required
 dist: trusty
+notifications:
+  email: false
 cache:
   directories:
     - _build
