@@ -16,8 +16,9 @@ defmodule TestmetricsElixirClientTest do
     end
 
     test_store = run_tests()
-    results = Agent.get(test_store, fn state -> state end)
-    assert results == %{}
+    results = Agent.get(test_store, & &1)
+    IO.puts("TEST RESULTS: #{inspect(results)}")
+    assert %{run_nanoseconds: _, load_nanoseconds: _} = results
   end
 
   defp run_tests do

@@ -17,26 +17,27 @@ defmodule TestmetricsElixirClient do
     {:noreply, state}
   end
 
-  def handle_cast({:suite_finished, _run_us, _load_us}, state) do
+  def handle_cast({:suite_finished, run_nanoseconds, load_nanoseconds}, state) do
     project_key = System.get_env("TESTMETRICS_PROJECT_KEY")
+    total_info = %{run_nanoseconds: run_nanoseconds, load_nanoseconds: load_nanoseconds}
+    state = Map.merge(state, total_info)
     Results.persist(state, project_key)
     {:noreply, state}
   end
 
-  def handle_cast({:test_started, test}, state) do
+  def handle_cast({:test_started, _test}, state) do
     {:noreply, state}
   end
 
-  def handle_cast({:test_finished, test}, state) do
+  def handle_cast({:test_finished, _test}, state) do
     {:noreply, state}
   end
 
-  def handle_cast({:module_started, test_module}, state) do
+  def handle_cast({:module_started, _test_module}, state) do
     {:noreply, state}
   end
 
-  def handle_cast({:module_finished, test_module}, state) do
-    #IO.inspect(test_module)
+  def handle_cast({:module_finished, _test_module}, state) do
     {:noreply, state}
   end
 
