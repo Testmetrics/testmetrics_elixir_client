@@ -3,7 +3,7 @@ defmodule TestmetricsElixirClient.Results do
 
   use Tesla
 
-  plug Tesla.Middleware.BaseUrl, "http://localhost:4000"
+  plug Tesla.Middleware.BaseUrl, "https://testmetrics-app.herokuapp.com"
   plug Tesla.Middleware.JSON
 
   @doc false
@@ -13,7 +13,7 @@ defmodule TestmetricsElixirClient.Results do
   end
 
   def persist(%{run_nanoseconds: run_time}, _project_key) do
-    post("/results", %{total_run_time: run_time})
+    _ = post("/results", %{total_run_time: run_time})
     :ok
   end
 end
