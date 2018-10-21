@@ -16,11 +16,8 @@ defmodule TestmetricsElixirClient do
   end
 
   def handle_cast({:suite_finished, run_nanoseconds, _load_nanoseconds}, state) do
-    project_key = System.get_env("TESTMETRICS_PROJECT_KEY")
-    branch = System.cmd("git", ["branch"])
-    IO.inspect(branch)
-    state = Map.merge(state, %{total_run_time: run_nanoseconds})
-    Results.persist(state, project_key)
+    state = Map.merge(state, %{total_run_time: run_nanoseconds, branch: git_branch()})
+    Results.persist(state, System.get_env("TESTMETRICS_PROJECT_KEY"))
     {:noreply, state}
   end
 
@@ -42,5 +39,14 @@ defmodule TestmetricsElixirClient do
 
   def handle_cast(_, state) do
     {:noreply, state}
+  end
+
+  defp git_branch do
+    {branch, 0} = System.cmd("git", ["branch"])
+    IO.inspect(branch, label: :branch)
+
+    ~r/\*\s+(\S+)\n/
+    |> Regex.run(branch)
+    |> List.last()
   end
 end
