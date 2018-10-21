@@ -17,7 +17,14 @@ defmodule TestmetricsElixirClientTest do
 
     test_store = run_tests()
     results = Agent.get(test_store, & &1)
-    assert %{total_run_time: _, branch: _} = results
+
+    assert %{
+             total_run_time: _,
+             branch: _,
+             sha: _,
+             elixir_version: _,
+             erlang_version: _
+           } = results
   end
 
   defp run_tests do

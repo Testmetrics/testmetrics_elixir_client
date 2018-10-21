@@ -15,7 +15,6 @@ defmodule TestmetricsElixirClient.Results do
   def persist(results, project_key) do
     _return =
       if project_key do
-        IO.inspect(project_key, label: :project_key)
         post("/results", Map.put(results, :project_key, project_key))
       end
 

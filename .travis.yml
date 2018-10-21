@@ -9,7 +9,7 @@ before_script:
   - MIX_ENV=test mix compile --warnings-as-errors
   - travis_wait mix dialyzer --plt
 script:
-  - mix test
+  - mix test --preload-modules
   - mix credo --strict
   - mix format --check-formatted
   - mix dialyzer --halt-exit-status

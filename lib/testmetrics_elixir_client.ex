@@ -16,9 +16,19 @@ defmodule TestmetricsElixirClient do
   end
 
   def handle_cast({:suite_finished, run_nanoseconds, _load_nanoseconds}, state) do
-    state = Map.merge(state, %{total_run_time: run_nanoseconds, branch: git_branch()})
+    {elixir_version, erlang_version} = elixir_and_erlang_versions()
+
+    state =
+      Map.merge(state, %{
+        total_run_time: run_nanoseconds,
+        branch: git_branch(),
+        sha: git_sha(),
+        elixir_version: elixir_version,
+        erlang_version: erlang_version
+      })
+
     Results.persist(state, System.get_env("TESTMETRICS_PROJECT_KEY"))
-    {:stop, :normal, state}
+    {:noreply, state}
   end
 
   def handle_cast({:test_started, _test}, state) do
@@ -41,8 +51,25 @@ defmodule TestmetricsElixirClient do
     {:noreply, state}
   end
 
-  @env_vars ["TRAVIS_BRANCH", "CIRCLE_BRANCH", "CI_COMMIT_REF_NAME", "BRANCH_NAME"]
+  @branch_vars ["TRAVIS_BRANCH", "CIRCLE_BRANCH", "CI_COMMIT_REF_NAME", "BRANCH_NAME"]
   defp git_branch do
-    Enum.find(@env_vars, &System.get_env(&1))
+    case Enum.find(@branch_vars, &System.get_env(&1)) do
+      nil -> nil
+      var -> System.get_env(var)
+    end
+  end
+
+  @sha_vars ["TRAVIS_COMMIT", "CIRCLE_SHA1", "CI_COMMIT_SHA", "REVISION"]
+  defp git_sha do
+    case Enum.find(@sha_vars, &System.get_env(&1)) do
+      nil -> nil
+      var -> System.get_env(var)
+    end
+  end
+
+  defp elixir_and_erlang_versions do
+    {output, 0} = System.cmd("elixir", ["--version"])
+    [_, erlang, elixir] = Regex.run(~r/\A(.*)\n\n(.*)/, output)
+    {elixir, erlang}
   end
 end
