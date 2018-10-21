@@ -43,10 +43,10 @@ defmodule TestmetricsElixirClient do
 
   defp git_branch do
     {branch, 0} = System.cmd("git", ["branch"])
-    IO.inspect(branch, label: :branch)
 
-    ~r/\*\s+(\S+)\n/
-    |> Regex.run(branch)
-    |> List.last()
+    case Regex.run(~r/\*\s+(\S+)\n/, branch) do
+      nil -> nil
+      match_info -> List.last(match_info)
+    end
   end
 end
