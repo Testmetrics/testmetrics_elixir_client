@@ -17,8 +17,7 @@ defmodule TestmetricsElixirClientTest do
 
     test_store = run_tests()
     results = Agent.get(test_store, & &1)
-    IO.puts("TEST RESULTS: #{inspect(results)}")
-    assert %{run_nanoseconds: _, load_nanoseconds: _} = results
+    assert %{total_run_time: _, branch: _} = results
   end
 
   defp run_tests do
@@ -27,6 +26,7 @@ defmodule TestmetricsElixirClientTest do
     ExUnit.configure(testmetrics_test_store: pid)
     Server.modules_loaded()
     ExUnit.run()
+    ExUnit.configure(testmetrics_test_store: nil)
     pid
   end
 end
