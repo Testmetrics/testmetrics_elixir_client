@@ -6,8 +6,6 @@ defmodule TestmetricsElixirClient do
 
   alias TestmetricsElixirClient.Results
 
-  ## Callbacks
-
   def init(opts) do
     {_, test_store} = Enum.find(opts, {nil, nil}, fn {k, _} -> k == :testmetrics_test_store end)
     {:ok, %{test_store: test_store}}
@@ -17,10 +15,11 @@ defmodule TestmetricsElixirClient do
     {:noreply, state}
   end
 
-  def handle_cast({:suite_finished, run_nanoseconds, load_nanoseconds}, state) do
+  def handle_cast({:suite_finished, run_nanoseconds, _load_nanoseconds}, state) do
     project_key = System.get_env("TESTMETRICS_PROJECT_KEY")
-    total_info = %{run_nanoseconds: run_nanoseconds, load_nanoseconds: load_nanoseconds}
-    state = Map.merge(state, total_info)
+    branch = System.cmd("git", ["branch"])
+    IO.inspect(branch)
+    state = Map.merge(state, %{total_run_time: run_nanoseconds})
     Results.persist(state, project_key)
     {:noreply, state}
   end

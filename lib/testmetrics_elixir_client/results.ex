@@ -12,8 +12,8 @@ defmodule TestmetricsElixirClient.Results do
     Agent.update(test_store, fn _ -> Map.delete(results, :test_store) end)
   end
 
-  def persist(%{run_nanoseconds: run_time}, _project_key) do
-    _ = post("/results", %{total_run_time: run_time})
+  def persist(results, _project_key) do
+    _return = post("/results", results)
     :ok
   end
 end
