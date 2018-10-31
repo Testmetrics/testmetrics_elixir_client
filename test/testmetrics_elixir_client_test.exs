@@ -20,11 +20,34 @@ defmodule TestmetricsElixirClientTest do
 
     assert %{
              total_run_time: _,
+             key: _,
              branch: _,
              sha: _,
-             elixir_version: _,
-             erlang_version: _
+             metadata: %{
+               elixir_version: _,
+               erlang_version: _,
+               ci_platform: _
+             },
+             tests: [
+               %{
+                 name: name1,
+                 total_run_time: _,
+                 state: state1
+               },
+               %{
+                 name: name2,
+                 total_run_time: _,
+                 state: state2
+               }
+             ]
            } = results
+
+    assert [name1, name2] == [
+             "Elixir.TestmetricsElixirClientTest.BasicTest test true",
+             "Elixir.TestmetricsElixirClientTest.BasicTest test false"
+           ]
+
+    assert [state1, state2] == ["passed", "failed"]
   end
 
   defp run_tests do

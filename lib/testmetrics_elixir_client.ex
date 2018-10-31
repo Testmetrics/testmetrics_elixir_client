@@ -8,7 +8,7 @@ defmodule TestmetricsElixirClient do
 
   def init(opts) do
     {_, test_store} = Enum.find(opts, {nil, nil}, fn {k, _} -> k == :testmetrics_test_store end)
-    {:ok, %{test_store: test_store}}
+    {:ok, %{test_store: test_store, tests: %{}}}
   end
 
   def handle_cast({:suite_started, _opts}, state) do
@@ -17,17 +17,23 @@ defmodule TestmetricsElixirClient do
 
   def handle_cast({:suite_finished, run_nanoseconds, _load_nanoseconds}, state) do
     {elixir_version, erlang_version} = elixir_and_erlang_versions()
+    key = System.get_env("TESTMETRICS_PROJECT_KEY")
 
     state =
       Map.merge(state, %{
         total_run_time: run_nanoseconds,
+        key: key,
         branch: git_branch(),
         sha: git_sha(),
-        elixir_version: elixir_version,
-        erlang_version: erlang_version
+        metadata: %{
+          elixir_version: elixir_version,
+          erlang_version: erlang_version,
+          ci_platform: ci_platform()
+        },
+        tests: Enum.reduce(state.tests, [], &format_tests/2)
       })
 
-    Results.persist(state, System.get_env("TESTMETRICS_PROJECT_KEY"))
+    Results.persist(state, key)
     {:noreply, state}
   end
 
@@ -35,8 +41,13 @@ defmodule TestmetricsElixirClient do
     {:noreply, state}
   end
 
-  def handle_cast({:test_finished, _test}, state) do
-    {:noreply, state}
+  def handle_cast({:test_finished, test}, state) do
+    tests =
+      state.tests
+      |> Map.put_new(test.module, %{})
+      |> put_in([test.module, test.name], test)
+
+    {:noreply, %{state | tests: tests}}
   end
 
   def handle_cast({:module_started, _test_module}, state) do
@@ -67,9 +78,36 @@ defmodule TestmetricsElixirClient do
     end
   end
 
+  defp ci_platform do
+    case Enum.find(@sha_vars, &System.get_env(&1)) do
+      "TRAVIS_COMMIT" -> "Travis CI"
+      "CIRCLE_SHA1" -> "Circle CI"
+      "CI_COMMIT_SHA" -> "Gitlab CI"
+      "REVISION" -> "Semaphore CI"
+      nil -> "Unknown"
+    end
+  end
+
   defp elixir_and_erlang_versions do
     {output, 0} = System.cmd("elixir", ["--version"])
     [_, erlang, elixir] = Regex.run(~r/\A(.*)\n\n(.*)/, output)
     {elixir, erlang}
+  end
+
+  defp format_tests({module, tests}, acc) do
+    Enum.reduce(tests, acc, fn {_, test}, acc ->
+      state =
+        case test.state do
+          nil -> "passed"
+          {:failed, _} -> "failed"
+          {:skipped, _} -> "skipped"
+          {:excluded, _} -> "excluded"
+          {:invalid, _} -> "invalid"
+        end
+
+      name = "#{module} #{test.name}"
+
+      [%{name: name, total_run_time: test.time, state: state} | acc]
+    end)
   end
 end
