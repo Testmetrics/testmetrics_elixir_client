@@ -50,6 +50,14 @@ defmodule TestmetricsElixirClientTest do
     assert [state1, state2] == ["passed", "failed"]
   end
 
+  test "a slow test that should raise a warning on 1.6" do
+    if String.starts_with?(System.get_env("TRAVIS_ELIXIR_VERSION"), "1.6") do
+      Process.sleep(1000)
+    end
+
+    assert String.starts_with?("hello", "h")
+  end
+
   defp run_tests do
     ExUnit.configure(formatters: [TestmetricsElixirClient])
     {:ok, pid} = Agent.start(fn -> %{} end)

@@ -31,6 +31,7 @@ defmodule TestmetricsElixirClient do
   end
 
   def handle_cast({:suite_finished, run_nanoseconds, _load_nanoseconds}, state) do
+    key = System.get_env("TESTMETRICS_PROJECT_KEY")
     state =
       Map.merge(state, %{
         total_run_time: run_nanoseconds,
