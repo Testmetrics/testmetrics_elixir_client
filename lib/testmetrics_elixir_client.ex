@@ -12,24 +12,30 @@ defmodule TestmetricsElixirClient do
   end
 
   def handle_cast({:suite_started, _opts}, state) do
-    {:noreply, state}
-  end
-
-  def handle_cast({:suite_finished, run_nanoseconds, _load_nanoseconds}, state) do
-    {elixir_version, erlang_version} = elixir_and_erlang_versions()
     key = System.get_env("TESTMETRICS_PROJECT_KEY")
+    {elixir_version, erlang_version} = elixir_and_erlang_versions()
 
     state =
       Map.merge(state, %{
-        total_run_time: run_nanoseconds,
-        key: key,
         branch: git_branch(),
         sha: git_sha(),
         metadata: %{
           elixir_version: elixir_version,
           erlang_version: erlang_version,
           ci_platform: ci_platform()
-        },
+        }
+      })
+
+    Results.persist(state, key)
+    {:noreply, state}
+  end
+
+  def handle_cast({:suite_finished, run_nanoseconds, _load_nanoseconds}, state) do
+    key = System.get_env("TESTMETRICS_PROJECT_KEY")
+
+    state =
+      Map.merge(state, %{
+        total_run_time: run_nanoseconds,
         tests: Enum.reduce(state.tests, [], &format_tests/2)
       })
 
@@ -62,11 +68,29 @@ defmodule TestmetricsElixirClient do
     {:noreply, state}
   end
 
-  @branch_vars ["TRAVIS_BRANCH", "CIRCLE_BRANCH", "CI_COMMIT_REF_NAME", "BRANCH_NAME"]
+  def handle_info(_, state) do
+    {:noreply, state}
+  end
+
+  @branch_vars [
+    "TRAVIS_EVENT_TYPE",
+    "CIRCLE_BRANCH",
+    "CI_COMMIT_REF_NAME",
+    "BRANCH_NAME"
+  ]
   defp git_branch do
     case Enum.find(@branch_vars, &System.get_env(&1)) do
-      nil -> nil
-      var -> System.get_env(var)
+      nil ->
+        nil
+
+      "TRAVIS_EVENT_TYPE" = var ->
+        case System.get_env(var) do
+          "push" -> System.get_env("TRAVIS_BRANCH")
+          "pull_request" -> System.get_env("TRAVIS_PULL_REQUEST_BRANCH")
+        end
+
+      var ->
+        System.get_env(var)
     end
   end
 
