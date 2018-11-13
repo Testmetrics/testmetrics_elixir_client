@@ -43,8 +43,8 @@ defmodule TestmetricsElixirClientTest do
            } = results
 
     assert [name1, name2] == [
-             "Elixir.TestmetricsElixirClientTest.BasicTest test true",
-             "Elixir.TestmetricsElixirClientTest.BasicTest test false"
+             "TestmetricsElixirClientTest.BasicTest test true",
+             "TestmetricsElixirClientTest.BasicTest test false"
            ]
 
     assert [state1, state2] == ["passed", "failed"]
