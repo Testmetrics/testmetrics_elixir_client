@@ -2,8 +2,8 @@ defmodule TestmetricsElixirClient.Results do
   @moduledoc false
 
   use Tesla
-
-  plug(Tesla.Middleware.BaseUrl, "https://testmetrics-app.herokuapp.com")
+  adapter(Tesla.Adapter.Httpc)
+  plug(Tesla.Middleware.BaseUrl, "https://www.testmetrics.app")
   plug(Tesla.Middleware.JSON)
 
   @doc false
@@ -15,7 +15,7 @@ defmodule TestmetricsElixirClient.Results do
   def persist(results, project_key) do
     _return =
       if project_key do
-        post("/results", Map.put(results, :project_key, project_key))
+        post("/results", Map.put(results, :key, project_key))
       end
 
     :ok
