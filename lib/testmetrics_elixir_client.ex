@@ -12,24 +12,30 @@ defmodule TestmetricsElixirClient do
   end
 
   def handle_cast({:suite_started, _opts}, state) do
-    {:noreply, state}
-  end
-
-  def handle_cast({:suite_finished, run_nanoseconds, _load_nanoseconds}, state) do
-    {elixir_version, erlang_version} = elixir_and_erlang_versions()
     key = System.get_env("TESTMETRICS_PROJECT_KEY")
+    {elixir_version, erlang_version} = elixir_and_erlang_versions()
 
     state =
       Map.merge(state, %{
-        total_run_time: run_nanoseconds,
-        key: key,
         branch: git_branch(),
         sha: git_sha(),
         metadata: %{
           elixir_version: elixir_version,
           erlang_version: erlang_version,
           ci_platform: ci_platform()
-        },
+        }
+      })
+
+    Results.persist(state, key)
+    {:noreply, state}
+  end
+
+  def handle_cast({:suite_finished, run_nanoseconds, _load_nanoseconds}, state) do
+    key = System.get_env("TESTMETRICS_PROJECT_KEY")
+
+    state =
+      Map.merge(state, %{
+        total_run_time: run_nanoseconds,
         tests: Enum.reduce(state.tests, [], &format_tests/2)
       })
 
@@ -59,6 +65,10 @@ defmodule TestmetricsElixirClient do
   end
 
   def handle_cast(_, state) do
+    {:noreply, state}
+  end
+
+  def handle_info(_, state) do
     {:noreply, state}
   end
 

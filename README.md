@@ -39,4 +39,3 @@ seeing how you can improve your test suite!
 
 `TestmetricsElixirClient` is offered under the MIT license. For the full license
 text see [LICENSE.md](https://github.com/testmetrics/testmetrics_elixir_client/blob/master/LICENSE.md).
-
