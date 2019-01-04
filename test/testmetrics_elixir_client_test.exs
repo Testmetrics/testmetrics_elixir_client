@@ -50,6 +50,11 @@ defmodule TestmetricsElixirClientTest do
     assert [state1, state2] == ["passed", "failed"]
   end
 
+  test "new slow test" do
+    Process.sleep(2000)
+    assert true
+  end
+
   defp run_tests do
     ExUnit.configure(formatters: [TestmetricsElixirClient])
     {:ok, pid} = Agent.start(fn -> %{} end)
