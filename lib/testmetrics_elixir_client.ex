@@ -76,12 +76,12 @@ defmodule TestmetricsElixirClient do
     "TRAVIS_EVENT_TYPE",
     "CIRCLE_BRANCH",
     "CI_COMMIT_REF_NAME",
-    "BRANCH_NAME"
+    "SEMAPHORE_GIT_BRANCH"
   ]
   defp git_branch do
     case Enum.find(@branch_vars, &System.get_env(&1)) do
       nil ->
-        nil
+        "Unknown"
 
       "TRAVIS_EVENT_TYPE" = var ->
         case System.get_env(var) do
@@ -94,10 +94,10 @@ defmodule TestmetricsElixirClient do
     end
   end
 
-  @sha_vars ["TRAVIS_COMMIT", "CIRCLE_SHA1", "CI_COMMIT_SHA", "REVISION"]
+  @sha_vars ["TRAVIS_COMMIT", "CIRCLE_SHA1", "CI_COMMIT_SHA", "SEMAPHORE_GIT_SHA"]
   defp git_sha do
     case Enum.find(@sha_vars, &System.get_env(&1)) do
-      nil -> nil
+      nil -> "Unknown"
       var -> System.get_env(var)
     end
   end
@@ -107,7 +107,7 @@ defmodule TestmetricsElixirClient do
       "TRAVIS_COMMIT" -> "Travis CI"
       "CIRCLE_SHA1" -> "Circle CI"
       "CI_COMMIT_SHA" -> "Gitlab CI"
-      "REVISION" -> "Semaphore CI"
+      "SEMAPHORE_GIT_SHA" -> "Semaphore CI"
       nil -> "Unknown"
     end
   end
