@@ -76,7 +76,8 @@ defmodule TestmetricsElixirClient do
     "TRAVIS_EVENT_TYPE",
     "CIRCLE_BRANCH",
     "CI_COMMIT_REF_NAME",
-    "SEMAPHORE_GIT_BRANCH"
+    "SEMAPHORE_GIT_BRANCH",
+    "CODEBUILD_SOURCE_VERSION"
   ]
   defp git_branch do
     case Enum.find(@branch_vars, &System.get_env(&1)) do
@@ -94,7 +95,13 @@ defmodule TestmetricsElixirClient do
     end
   end
 
-  @sha_vars ["TRAVIS_COMMIT", "CIRCLE_SHA1", "CI_COMMIT_SHA", "SEMAPHORE_GIT_SHA"]
+  @sha_vars [
+    "TRAVIS_COMMIT",
+    "CIRCLE_SHA1",
+    "CI_COMMIT_SHA",
+    "SEMAPHORE_GIT_SHA",
+    "CODEBUILD_RESOLVED_SOURCE_VERSION"
+  ]
   defp git_sha do
     case Enum.find(@sha_vars, &System.get_env(&1)) do
       nil -> "Unknown"
@@ -108,6 +115,7 @@ defmodule TestmetricsElixirClient do
       "CIRCLE_SHA1" -> "Circle CI"
       "CI_COMMIT_SHA" -> "Gitlab CI"
       "SEMAPHORE_GIT_SHA" -> "Semaphore CI"
+      "CODEBUILD_RESOLVED_SOURCE_VERSION" -> "AWS CodeBuild"
       nil -> "Unknown"
     end
   end

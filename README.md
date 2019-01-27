@@ -26,6 +26,9 @@ ExUnit.configure(formatters: [ExUnit.CLIFormatter, TestmetricsElixirClient])
 
 That will add `TestmetricsElixirClient` as well as the standard `CLIFormatter`.
 
+Here's [an example commit](https://github.com/devonestes/credo/commit/6c24e2c4fda8d08b02957ea6923e3963e7e34642) showing everything that needs to be done to add
+Testmetrics to `credo` - it's just two lines!
+
 In order for the metrics to be send to Testmetrics, you must have your
 Testmetrics Project Key set in the "TESTMETRICS_PROJECT_KEY" environment
 variable in your CI environment. If this environment variable isn't set, the

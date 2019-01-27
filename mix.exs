@@ -4,7 +4,7 @@ defmodule TestmetricsElixirClient.MixProject do
   def project do
     [
       app: :testmetrics_elixir_client,
-      version: "1.1.2",
+      version: "1.2.0",
       build_per_environment: false,
       elixir: "~> 1.6",
       dialyzer: [
